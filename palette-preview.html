@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Preview - Cohen Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .palette-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .palette-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .palette-header {
+            padding: 1.5rem;
+            background: #fff;
+            border-bottom: 2px solid #eee;
+        }
+
+        .palette-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .palette-subtitle {
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .palette-mood {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: #f0f0f0;
+            border-radius: 12px;
+            color: #555;
+        }
+
+        .color-swatches {
+            display: flex;
+            height: 120px;
+        }
+
+        .color-swatch {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .color-swatch:hover {
+            flex: 1.5;
+        }
+
+        .accent-preview {
+            padding: 1rem 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            background: var(--bg-color);
+        }
+
+        .accent-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .accent-button:hover {
+            transform: scale(1.05);
+        }
+
+        .current-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #4CAF50;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .palette-card {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .palette-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Color Palette Preview</h1>
+        <p style="text-align: center; margin-bottom: 2rem; color: #666;">
+            Click on any color swatch to copy its hex code
+        </p>
+
+        <div class="palette-grid">
+            <!-- Current Palette: Desert Sunset -->
+            <div class="palette-card">
+                <span class="current-badge">CURRENT</span>
+                <div class="palette-header">
+                    <div class="palette-name">Desert Sunset</div>
+                    <div class="palette-subtitle">Warm earth tones with rust accents</div>
+                    <span class="palette-mood">Adventurous · Welcoming · Approachable</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #E8DCC4; color: #333;" title="#E8DCC4">Sand</div>
+                    <div class="color-swatch" style="background: #C9B896; color: #333;" title="#C9B896">Dust</div>
+                    <div class="color-swatch" style="background: #8B7355; color: #fff;" title="#8B7355">Earth</div>
+                    <div class="color-swatch" style="background: #5A4A3A; color: #fff;" title="#5A4A3A">Stone</div>
+                    <div class="color-swatch" style="background: #3A2F24; color: #fff;" title="#3A2F24">Rock</div>
+                    <div class="color-swatch" style="background: #1A1612; color: #fff;" title="#1A1612">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #1A1612;">
+                    <button class="accent-button" style="background: #D4722B; color: #fff;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #D4722B; color: #D4722B;">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Mountain Trail -->
+            <div class="palette-card">
+                <div class="palette-header">
+                    <div class="palette-name">Mountain Trail</div>
+                    <div class="palette-subtitle">Cool greens with forest accents</div>
+                    <span class="palette-mood">Fresh · Natural · Eco-friendly</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #E8EDE8; color: #333;" title="#E8EDE8">Mist</div>
+                    <div class="color-swatch" style="background: #C5CFC5; color: #333;" title="#C5CFC5">Fog</div>
+                    <div class="color-swatch" style="background: #7A8F7A; color: #fff;" title="#7A8F7A">Moss</div>
+                    <div class="color-swatch" style="background: #4A5A4A; color: #fff;" title="#4A5A4A">Pine</div>
+                    <div class="color-swatch" style="background: #2F3A2F; color: #fff;" title="#2F3A2F">Forest</div>
+                    <div class="color-swatch" style="background: #1A1F1A; color: #fff;" title="#1A1F1A">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #1A1F1A;">
+                    <button class="accent-button" style="background: #88A04A; color: #fff;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #88A04A; color: #88A04A;">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Steel & Smoke -->
+            <div class="palette-card">
+                <div class="palette-header">
+                    <div class="palette-name">Steel & Smoke</div>
+                    <div class="palette-subtitle">Industrial grays with blue accents</div>
+                    <span class="palette-mood">Modern · Technical · Professional</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #E8EAED; color: #333;" title="#E8EAED">Chrome</div>
+                    <div class="color-swatch" style="background: #BFC5CA; color: #333;" title="#BFC5CA">Steel</div>
+                    <div class="color-swatch" style="background: #7A8085; color: #fff;" title="#7A8085">Iron</div>
+                    <div class="color-swatch" style="background: #4A4F54; color: #fff;" title="#4A4F54">Metal</div>
+                    <div class="color-swatch" style="background: #2A2F34; color: #fff;" title="#2A2F34">Gun</div>
+                    <div class="color-swatch" style="background: #151719; color: #fff;" title="#151719">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #151719;">
+                    <button class="accent-button" style="background: #5B9BD5; color: #fff;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #5B9BD5; color: #5B9BD5;">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Volcanic Rock -->
+            <div class="palette-card">
+                <div class="palette-header">
+                    <div class="palette-name">Volcanic Rock</div>
+                    <div class="palette-subtitle">Dark with fiery red/orange accents</div>
+                    <span class="palette-mood">Intense · Powerful · Dramatic</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #E8E3E0; color: #333;" title="#E8E3E0">Ash</div>
+                    <div class="color-swatch" style="background: #C9C0BA; color: #333;" title="#C9C0BA">Smoke</div>
+                    <div class="color-swatch" style="background: #8B7F75; color: #fff;" title="#8B7F75">Slate</div>
+                    <div class="color-swatch" style="background: #5A4A40; color: #fff;" title="#5A4A40">Lava</div>
+                    <div class="color-swatch" style="background: #3A2A20; color: #fff;" title="#3A2A20">Obsid</div>
+                    <div class="color-swatch" style="background: #1A0F0A; color: #fff;" title="#1A0F0A">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #1A0F0A;">
+                    <button class="accent-button" style="background: #E85A2A; color: #fff;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #E85A2A; color: #E85A2A;">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Ocean Dusk -->
+            <div class="palette-card">
+                <div class="palette-header">
+                    <div class="palette-name">Ocean Dusk</div>
+                    <div class="palette-subtitle">Deep blues with teal accents</div>
+                    <span class="palette-mood">Cool · Calm · Adventurous</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #E8F2F5; color: #333;" title="#E8F2F5">Foam</div>
+                    <div class="color-swatch" style="background: #C5D9E0; color: #333;" title="#C5D9E0">Mist</div>
+                    <div class="color-swatch" style="background: #7AA3B5; color: #fff;" title="#7AA3B5">Ocean</div>
+                    <div class="color-swatch" style="background: #4A6B7A; color: #fff;" title="#4A6B7A">Depth</div>
+                    <div class="color-swatch" style="background: #2A3F4A; color: #fff;" title="#2A3F4A">Abyss</div>
+                    <div class="color-swatch" style="background: #1A2329; color: #fff;" title="#1A2329">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #1A2329;">
+                    <button class="accent-button" style="background: #4ECDC4; color: #fff;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #4ECDC4; color: #4ECDC4;">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Sahara Gold -->
+            <div class="palette-card">
+                <div class="palette-header">
+                    <div class="palette-name">Sahara Gold</div>
+                    <div class="palette-subtitle">Warm yellows and golden browns</div>
+                    <span class="palette-mood">Luxurious · Warm · Exotic</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #F5F0E8; color: #333;" title="#F5F0E8">Pearl</div>
+                    <div class="color-swatch" style="background: #E8D5B8; color: #333;" title="#E8D5B8">Sand</div>
+                    <div class="color-swatch" style="background: #D4A76A; color: #333;" title="#D4A76A">Gold</div>
+                    <div class="color-swatch" style="background: #A67C52; color: #fff;" title="#A67C52">Bronze</div>
+                    <div class="color-swatch" style="background: #6B4423; color: #fff;" title="#6B4423">Copper</div>
+                    <div class="color-swatch" style="background: #2A1810; color: #fff;" title="#2A1810">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #2A1810;">
+                    <button class="accent-button" style="background: #F4A460; color: #fff;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #F4A460; color: #F4A460;">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Nordic Storm -->
+            <div class="palette-card">
+                <div class="palette-header">
+                    <div class="palette-name">Nordic Storm</div>
+                    <div class="palette-subtitle">Cool grays with purple accents</div>
+                    <span class="palette-mood">Modern · Mysterious · Premium</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #EAEBF0; color: #333;" title="#EAEBF0">Snow</div>
+                    <div class="color-swatch" style="background: #CED0DB; color: #333;" title="#CED0DB">Cloud</div>
+                    <div class="color-swatch" style="background: #8A8D9F; color: #fff;" title="#8A8D9F">Slate</div>
+                    <div class="color-swatch" style="background: #545766; color: #fff;" title="#545766">Storm</div>
+                    <div class="color-swatch" style="background: #2E3039; color: #fff;" title="#2E3039">Thund</div>
+                    <div class="color-swatch" style="background: #1A1B20; color: #fff;" title="#1A1B20">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #1A1B20;">
+                    <button class="accent-button" style="background: #7C5CDB; color: #fff;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #7C5CDB; color: #7C5CDB;">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Canyon Clay -->
+            <div class="palette-card">
+                <div class="palette-header">
+                    <div class="palette-name">Canyon Clay</div>
+                    <div class="palette-subtitle">Terracotta reds with warm earth tones</div>
+                    <span class="palette-mood">Southwestern · Earthy · Authentic</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #F0E8E0; color: #333;" title="#F0E8E0">Chalk</div>
+                    <div class="color-swatch" style="background: #D9C4B0; color: #333;" title="#D9C4B0">Clay</div>
+                    <div class="color-swatch" style="background: #B8896A; color: #fff;" title="#B8896A">Terra</div>
+                    <div class="color-swatch" style="background: #8B5A3C; color: #fff;" title="#8B5A3C">Adobe</div>
+                    <div class="color-swatch" style="background: #5A3020; color: #fff;" title="#5A3020">Canyon</div>
+                    <div class="color-swatch" style="background: #2A1810; color: #fff;" title="#2A1810">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #2A1810;">
+                    <button class="accent-button" style="background: #C9704A; color: #fff;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #C9704A; color: #C9704A;">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Midnight Explorer -->
+            <div class="palette-card">
+                <div class="palette-header">
+                    <div class="palette-name">Midnight Explorer</div>
+                    <div class="palette-subtitle">Dark with bright cyan accents</div>
+                    <span class="palette-mood">Futuristic · Tech-forward · Edgy</span>
+                </div>
+                <div class="color-swatches">
+                    <div class="color-swatch" style="background: #E8EDEF; color: #333;" title="#E8EDEF">Pearl</div>
+                    <div class="color-swatch" style="background: #C5CDD5; color: #333;" title="#C5CDD5">Silver</div>
+                    <div class="color-swatch" style="background: #7A8590; color: #fff;" title="#7A8590">Graph</div>
+                    <div class="color-swatch" style="background: #4A525A; color: #fff;" title="#4A525A">Char</div>
+                    <div class="color-swatch" style="background: #2A2F34; color: #fff;" title="#2A2F34">Onyx</div>
+                    <div class="color-swatch" style="background: #0F1215; color: #fff;" title="#0F1215">Night</div>
+                </div>
+                <div class="accent-preview" style="--bg-color: #0F1215;">
+                    <button class="accent-button" style="background: #00D9FF; color: #000;">Primary Button</button>
+                    <button class="accent-button" style="background: transparent; border: 2px solid #00D9FF; color: #00D9FF;">Secondary</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 2rem; background: white; border-radius: 12px;">
+            <p style="color: #666; margin-bottom: 1rem;">
+                See <strong>COLOR-PALETTES.md</strong> for implementation instructions
+            </p>
+            <p style="color: #999; font-size: 0.875rem;">
+                Click any color swatch above to copy its hex code to clipboard
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Add click-to-copy functionality
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                const hexCode = swatch.getAttribute('title');
+                navigator.clipboard.writeText(hexCode).then(() => {
+                    const originalText = swatch.textContent;
+                    swatch.textContent = 'Copied!';
+                    setTimeout(() => {
+                        swatch.textContent = originalText;
+                    }, 1000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
