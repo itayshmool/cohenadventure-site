@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" data-lang="he">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
@@ -22,22 +22,22 @@
         <div class="hero__content">
             <div class="hero__badge" data-animate="fade-up">
                 <span class="badge__icon">🏍️</span>
-                <span class="badge__text">מדריך אדוונצ'ר מוסמך</span>
+                <span class="badge__text" data-i18n="hero.badge">מדריך אדוונצ'ר מוסמך</span>
             </div>
             <h1 class="hero__title" data-animate="fade-up" data-delay="100">
-                <span class="title__main">צביקה כהן</span>
-                <span class="title__sub">השטח</span>
+                <span class="title__main" data-i18n="hero.name">צביקה כהן</span>
+                <span class="title__sub" data-i18n="hero.subtitle">השטח</span>
             </h1>
-            <p class="hero__tagline" data-animate="fade-up" data-delay="200">
+            <p class="hero__tagline" data-animate="fade-up" data-delay="200" data-i18n="hero.tagline">
                 הדרכות אופנועי אדוונצ'ר · מסעות בישראל ובעולם · יוצר תוכן
             </p>
             <div class="hero__cta" data-animate="fade-up" data-delay="300">
-                <a href="#contact" class="btn btn--primary">בואו נצא לדרך</a>
-                <a href="#about" class="btn btn--ghost">למי זה מתאים?</a>
+                <a href="#contact" class="btn btn--primary" data-i18n="hero.ctaPrimary">בואו נצא לדרך</a>
+                <a href="#about" class="btn btn--ghost" data-i18n="hero.ctaSecondary">למי זה מתאים?</a>
             </div>
         </div>
         <div class="hero__scroll" data-animate="fade-up" data-delay="400">
-            <span class="scroll__text">גללו למטה</span>
+            <span class="scroll__text" data-i18n="hero.scrollText">גללו למטה</span>
             <span class="scroll__line"></span>
         </div>
     </header>
@@ -273,22 +273,28 @@
     <nav class="nav" id="nav">
         <div class="nav__brand">
             <span class="nav__logo">🏍️</span>
-            <span class="nav__name">צביקה כהן</span>
+            <span class="nav__name" data-i18n="hero.name">צביקה כהן</span>
         </div>
-        <button class="nav__toggle" id="navToggle" aria-label="תפריט">
-            <span class="nav__toggle-line"></span>
-            <span class="nav__toggle-line"></span>
-            <span class="nav__toggle-line"></span>
-        </button>
+        <div class="nav__actions">
+            <button class="lang-toggle" id="langToggle" aria-label="Toggle Language">
+                <span class="lang-toggle__text">EN</span>
+            </button>
+            <button class="nav__toggle" id="navToggle" aria-label="תפריט">
+                <span class="nav__toggle-line"></span>
+                <span class="nav__toggle-line"></span>
+                <span class="nav__toggle-line"></span>
+            </button>
+        </div>
         <div class="nav__menu" id="navMenu">
-            <a href="#home" class="nav__link">ראשי</a>
-            <a href="#about" class="nav__link">אודות</a>
-            <a href="#services" class="nav__link">שירותים</a>
-            <a href="#gallery" class="nav__link">גלריה</a>
-            <a href="#contact" class="nav__link">צור קשר</a>
+            <a href="#home" class="nav__link" data-i18n="nav.home">ראשי</a>
+            <a href="#about" class="nav__link" data-i18n="nav.about">אודות</a>
+            <a href="#services" class="nav__link" data-i18n="nav.services">שירותים</a>
+            <a href="#gallery" class="nav__link" data-i18n="nav.gallery">גלריה</a>
+            <a href="#contact" class="nav__link" data-i18n="nav.contact">צור קשר</a>
         </div>
     </nav>
 
+    <script src="translations.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
