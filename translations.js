@@ -7,6 +7,7 @@ const translations = {
             about: 'אודות',
             services: 'שירותים',
             gallery: 'גלריה',
+            blog: 'בלוג',
             contact: 'צור קשר'
         },
         // Hero Section
@@ -99,6 +100,7 @@ const translations = {
             about: 'About',
             services: 'Services',
             gallery: 'Gallery',
+            blog: 'Blog',
             contact: 'Contact'
         },
         // Hero Section

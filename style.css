@@ -233,15 +233,16 @@ p {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(26, 22, 18, 0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(26, 22, 18, 0.98);
+    backdrop-filter: blur(20px);
     padding: 1rem var(--container-padding);
     display: flex;
     justify-content: space-between;
     align-items: center;
     transform: translateY(-100%);
     transition: transform var(--transition-base);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    border-bottom: 1px solid rgba(212, 114, 43, 0.2);
 }
 
 .nav.visible {
@@ -340,7 +341,7 @@ p {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(26, 22, 18, 0.98);
+    background: rgb(26, 22, 18);
     backdrop-filter: blur(20px);
     display: flex;
     flex-direction: column;
