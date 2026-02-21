@@ -57,9 +57,16 @@
     padding: 0;
 }
 
+/* Prevent horizontal overflow on all elements */
+* {
+    max-width: 100%;
+}
+
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    overflow-x: hidden;
+    width: 100%;
     /* Mobile viewport fix */
     -webkit-text-size-adjust: 100%;
 }
@@ -70,11 +77,14 @@ body {
     color: var(--color-text);
     line-height: 1.6;
     overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Touch optimization */
     -webkit-tap-highlight-color: rgba(212, 114, 43, 0.3);
-    touch-action: manipulation;
+    touch-action: pan-y;
 }
 
 /* Larger spacing on desktop */
@@ -95,11 +105,20 @@ h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     font-weight: 900;
     line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 a {
     color: inherit;
     text-decoration: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 /* ===========================
@@ -108,8 +127,10 @@ a {
 
 .container {
     max-width: var(--container-max);
+    width: 100%;
     margin: 0 auto;
     padding: 0 var(--container-padding);
+    overflow-x: hidden;
 }
 
 .section__label {
@@ -326,6 +347,8 @@ a {
 .hero {
     min-height: 100vh;
     min-height: 100svh; /* Mobile viewport units */
+    width: 100%;
+    max-width: 100vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -361,7 +384,9 @@ a {
 .hero__content {
     position: relative;
     z-index: 2;
-    max-width: 600px;
+    width: 100%;
+    max-width: min(600px, 100%);
+    padding: 0 var(--container-padding);
 }
 
 .hero__badge {
@@ -432,9 +457,11 @@ a {
     color: var(--color-text-muted);
     margin-bottom: var(--spacing-lg);
     line-height: 1.7;
+    width: 100%;
     max-width: 90%;
     margin-left: auto;
     margin-right: auto;
+    word-wrap: break-word;
 }
 
 @media (min-width: 768px) {
@@ -598,6 +625,8 @@ a {
     padding: var(--spacing-xl) 0;
     background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
     position: relative;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
@@ -610,6 +639,8 @@ a {
     display: grid;
     gap: var(--spacing-lg);
     align-items: center;
+    width: 100%;
+    max-width: 100%;
 }
 
 @media (min-width: 768px) {
@@ -621,6 +652,8 @@ a {
 
 .about__image-wrapper {
     position: relative;
+    width: 100%;
+    max-width: 100%;
 }
 
 .image__frame {
@@ -628,6 +661,8 @@ a {
     clip-path: polygon(0 10%, 100% 0, 100% 90%, 0 100%);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 100%;
 }
 
 .image__frame img {
@@ -782,6 +817,8 @@ a {
 .services {
     padding: var(--spacing-xl) 0;
     background: var(--color-bg);
+    width: 100%;
+    overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
@@ -804,6 +841,8 @@ a {
 .services__grid {
     display: grid;
     gap: var(--spacing-md);
+    width: 100%;
+    max-width: 100%;
 }
 
 @media (min-width: 768px) {
@@ -826,6 +865,9 @@ a {
     border: 2px solid rgba(232, 220, 196, 0.1);
     transition: all var(--transition-base);
     clip-path: polygon(0 0, calc(100% - 1.5rem) 0, 100% 1.5rem, 100% 100%, 0 100%);
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
 }
 
 @media (min-width: 768px) {
@@ -927,6 +969,8 @@ a {
 .gallery {
     padding: var(--spacing-xl) 0;
     background: var(--color-surface);
+    width: 100%;
+    overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
@@ -950,6 +994,8 @@ a {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
+    width: 100%;
+    max-width: 100%;
 }
 
 @media (min-width: 768px) {
@@ -966,6 +1012,8 @@ a {
     aspect-ratio: 1;
     clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%);
     transition: all var(--transition-base);
+    width: 100%;
+    min-width: 0;
 }
 
 .gallery__item img {
@@ -1073,6 +1121,8 @@ a {
 .social {
     padding: var(--spacing-xl) 0;
     background: linear-gradient(135deg, rgba(212, 114, 43, 0.1) 0%, var(--color-bg) 100%);
+    width: 100%;
+    overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
@@ -1185,6 +1235,8 @@ a {
 .contact {
     padding: var(--spacing-xl) 0;
     background: var(--color-surface);
+    width: 100%;
+    overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
@@ -1196,6 +1248,8 @@ a {
 .contact__grid {
     display: grid;
     gap: var(--spacing-lg);
+    width: 100%;
+    max-width: 100%;
 }
 
 @media (min-width: 768px) {
@@ -1353,6 +1407,8 @@ a {
     padding: var(--spacing-xl) 0 var(--spacing-lg);
     background: var(--color-night);
     border-top: 1px solid rgba(232, 220, 196, 0.1);
+    width: 100%;
+    overflow-x: hidden;
 }
 
 .footer__content {
