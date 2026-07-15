@@ -98,7 +98,9 @@ const jsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       }
       *{box-sizing:border-box;}
       html,body{margin:0;padding:0;}
-      body{background:var(--ink);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;}
+      /* overflow-x:clip (not hidden) so it doesn't create a scroll container that
+         would break @wix/interact viewProgress/ViewTimeline (see docs/INTERACT.md). */
+      body{background:var(--ink);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip;}
       img{max-width:100%;}
       ::selection{background:var(--amber);color:#1a1508;}
       a{color:var(--sand);text-decoration:none;transition:color .18s ease;}
@@ -158,12 +160,8 @@ const jsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
           }, { threshold: 0.1, rootMargin: '0px 0px -8% 0px' });
           document.querySelectorAll('.rv:not(.in)').forEach(function (el) { io.observe(el); });
         }
-        function parallax() {
-          if (reduced) return;
-          var hero = document.querySelector('[data-parallax]');
-          if (!hero) return;
-          window.addEventListener('scroll', function () { hero.style.transform = 'translateY(' + (window.scrollY * 0.26) + 'px)'; }, { passive: true });
-        }
+        // Hero parallax is now handled by @wix/interact (ParallaxScroll on
+        // [data-interact-key="hero-bg"], compositor-driven via ViewTimeline).
         function videos() {
           document.querySelectorAll('[data-yt]').forEach(function (el) {
             el.addEventListener('click', function () {
@@ -201,7 +199,7 @@ const jsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
             slides[i].style.opacity = '1';
           }, 5000);
         }
-        function init() { icons(); reveal(); parallax(); videos(); sw(); activeTab(); heroSlideshow(); }
+        function init() { icons(); reveal(); videos(); sw(); activeTab(); heroSlideshow(); }
         window.addEventListener('hashchange', function () {
           document.querySelectorAll('.bottom-nav a.active').forEach(function (a) { a.classList.remove('active'); });
           activeTab();

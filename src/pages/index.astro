@@ -6,13 +6,13 @@ import type { Lang } from '../lib/i18n';
 import { DICT } from '../lib/i18n';
 import { getTrips, getReviews, getVideos, getPosts } from '../lib/content';
 import { Interact, generate } from '@wix/interact';
-import { FloatIn } from '@wix/motion-presets';
-import { roadbookConfig } from '../lib/interact.config';
+import { FloatIn, RevealIn, ParallaxScroll, Tilt3DMouse, Pulse } from '@wix/motion-presets';
+import { interactConfig } from '../lib/interact.config';
 
 // Generate the entrance/FOUC CSS at build/SSR time from the same config the
 // browser wires at runtime — one source of truth, no drift. vanilla → useFirstChild=false.
-Interact.registerEffects({ FloatIn });
-const interactCSS = generate(roadbookConfig, false);
+Interact.registerEffects({ FloatIn, RevealIn, ParallaxScroll, Tilt3DMouse, Pulse });
+const interactCSS = generate(interactConfig, false);
 
 const lang: Lang = Astro.url.searchParams.get('lang') === 'en' ? 'en' : 'he';
 const t = DICT[lang];
@@ -67,8 +67,8 @@ const jsonLd = [
   <style is:inline set:html={interactCSS}></style>
   <main id="top">
     <!-- HERO -->
-    <section style="position:relative;min-height:100vh;display:flex;align-items:flex-end;overflow:hidden;">
-      <div data-parallax style="position:absolute;inset:-12% 0;background:radial-gradient(120% 92% at 74% 16%,#3a2413 0%,#1b130c 46%,#0b0a09 80%);will-change:transform;">
+    <section style="position:relative;min-height:100vh;display:flex;align-items:flex-end;overflow:clip;">
+      <div data-interact-key="hero-bg" style="position:absolute;inset:-12% 0;background:radial-gradient(120% 92% at 74% 16%,#3a2413 0%,#1b130c 46%,#0b0a09 80%);will-change:transform;">
         {heroImages.map((h, i) => (
           <picture>
             <source media="(max-width:900px)" srcset={h.m} />
@@ -81,7 +81,7 @@ const jsonLd = [
       </div>
       <!-- legibility scrim: strong at the bottom (where the hero text sits, LTR or RTL) -->
       <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(6,5,5,.94) 0%,rgba(8,7,6,.74) 22%,rgba(11,10,9,.34) 46%,transparent 68%);"></div>
-      <div style="position:relative;z-index:3;max-width:var(--maxw);margin:0 auto;width:100%;padding:0 clamp(16px,4vw,40px) clamp(48px,7vh,90px);">
+      <div data-interact-key="hero-fg" style="position:relative;z-index:3;max-width:var(--maxw);margin:0 auto;width:100%;padding:0 clamp(16px,4vw,40px) clamp(48px,7vh,90px);transform-style:preserve-3d;">
         <div style="display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line-strong);border-radius:6px;padding:7px 13px;margin-bottom:24px;background:rgba(11,10,9,.42);">
           <span style="width:7px;height:7px;background:var(--amber);"></span>
           <span class="ofr-mono" style="font-size:11px;letter-spacing:.14em;color:var(--sand);">{t.heroKicker}</span>
@@ -91,11 +91,11 @@ const jsonLd = [
         <div style="margin-top:34px;">
           <a href="#roadbook" style="display:inline-flex;align-items:center;gap:10px;background:var(--amber);color:#1a1508;border-radius:8px;padding:16px 26px;font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 12px 40px -14px rgba(234,179,8,.6);">{t.heroCta}<i data-lucide={arrow} style="width:18px;height:18px;"></i></a>
         </div>
-        <div class="hud-bar" style="display:flex;flex-wrap:wrap;gap:0;margin-top:40px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:rgba(11,10,9,.4);max-width:640px;">
+        <div class="hud-bar" data-interact-key="hud" style="display:flex;flex-wrap:wrap;gap:0;margin-top:40px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:rgba(11,10,9,.4);max-width:640px;">
           {hud.map((h) => (
             <div style="flex:1 1 140px;padding:15px 18px;border-inline-end:1px solid var(--line);">
               <div class="ofr-mono" style="font-size:10px;letter-spacing:.16em;color:var(--fg-faint);margin-bottom:6px;">{h.label}</div>
-              <div class="ofr-mono" style="font-size:17px;font-weight:700;color:var(--fg);">{h.value}</div>
+              <div class="ofr-mono hud-num" data-count-to={String(parseInt(h.value, 10))} data-count-pad="2" style="font-size:17px;font-weight:700;color:var(--fg);">{h.value}</div>
             </div>
           ))}
         </div>
@@ -109,7 +109,7 @@ const jsonLd = [
     <section id="roadbook" style="padding:clamp(64px,9vh,120px) 0;position:relative;">
       <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.5;pointer-events:none;"></div>
       <div data-interact-key="roadbook-seq" style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
-        <div class="rv" style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:20px;border-bottom:2px solid var(--line-strong);">
+        <div class="sec-head" style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:20px;border-bottom:2px solid var(--line-strong);">
           <div>
             <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:12px;">{t.journeysKicker}</div>
             <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(32px,5.4vw,64px);line-height:.95;text-transform:uppercase;margin:0;">{t.journeysTitle}</h2>
@@ -139,15 +139,15 @@ const jsonLd = [
     </section>
 
     <!-- BIKE REVIEWS -->
-    <section id="reviews" style="padding:clamp(50px,8vh,100px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
-      <div style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
-        <div class="rv" style="margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
+    <section id="reviews" data-interact-key="reviews-lift" style="padding:clamp(50px,8vh,100px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
+      <div data-interact-key="reviews-seq" style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="sec-head" style="margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
           <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.reviewsKicker}</div>
           <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.6vw,54px);line-height:.95;text-transform:uppercase;margin:0;">{t.reviewsTitle}</h2>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">
           {reviews.map((r) => (
-            <a href={r.url || '#'} target={r.url ? '_blank' : undefined} rel="noopener" class="rv" style="text-decoration:none;color:var(--fg);border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--line);display:block;">
+            <a href={r.url || '#'} target={r.url ? '_blank' : undefined} rel="noopener" class="review-card" style="text-decoration:none;color:var(--fg);border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--line);display:block;">
               <div style="position:relative;height:180px;">
                 {r.img
                   ? <img src={r.img} alt={r.title} width="360" height="180" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" />
@@ -166,10 +166,10 @@ const jsonLd = [
     </section>
 
     <!-- TRAINING -->
-    <section id="training" style="padding:clamp(64px,9vh,120px) 0;position:relative;">
+    <section id="training" data-interact-key="training-lift" style="padding:clamp(64px,9vh,120px) 0;position:relative;">
       <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.5;pointer-events:none;"></div>
-      <div style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
-        <div class="rv" style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
+      <div data-interact-key="training-seq" style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="sec-head" style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
           <div>
             <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.trainingKicker}</div>
             <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.6vw,54px);line-height:.95;text-transform:uppercase;margin:0;">{t.trainingTitle}</h2>
@@ -178,7 +178,7 @@ const jsonLd = [
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
           {COURSES.map((c) => (
-            <a href="#contact" class="rv" style="text-decoration:none;color:var(--fg);position:relative;border-radius:10px;background:var(--surface);border:1px solid var(--line);padding:22px;display:flex;flex-direction:column;gap:14px;">
+            <a href="#contact" class="course-card" style="text-decoration:none;color:var(--fg);position:relative;border-radius:10px;background:var(--surface);border:1px solid var(--line);padding:22px;display:flex;flex-direction:column;gap:14px;">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
                 <span style="width:44px;height:44px;border-radius:8px;background:rgba(234,179,8,.12);border:1px solid var(--line-strong);display:grid;place-items:center;color:var(--amber);"><i data-lucide={c.icon} style="width:22px;height:22px;"></i></span>
                 <span class="ofr-mono" style="font-size:10px;letter-spacing:.1em;color:var(--fg-faint);border:1px solid var(--line);border-radius:5px;padding:5px 9px;text-transform:uppercase;">{c.level[lang]}</span>
@@ -198,9 +198,9 @@ const jsonLd = [
     </section>
 
     <!-- VIDEOS -->
-    <section id="videos" style="padding:clamp(64px,9vh,120px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
-      <div style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
-        <div class="rv" style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
+    <section id="videos" data-interact-key="videos-pulse" style="padding:clamp(64px,9vh,120px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
+      <div data-interact-key="videos-seq" style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="sec-head" style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
           <div>
             <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.videosKicker}</div>
             <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.6vw,54px);line-height:.95;text-transform:uppercase;margin:0;">{t.videosTitle}</h2>
@@ -215,7 +215,7 @@ const jsonLd = [
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;">
           {videos.map((v) => (
-            <article class="rv" style="border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--line);">
+            <article class="video-card" style="border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--line);">
               <div data-yt={v.embed} style="position:relative;height:198px;cursor:pointer;">
                 {v.thumb
                   ? <img src={v.thumb} alt={v.title} width="360" height="198" loading="lazy" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
@@ -223,7 +223,7 @@ const jsonLd = [
                 <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.72),rgba(11,10,9,.12));"></div>
                 {v.cat && <div style="position:absolute;top:12px;inset-inline-start:12px;background:rgba(11,10,9,.55);border-radius:5px;padding:5px 10px;"><span class="ofr-mono" style="font-size:10px;letter-spacing:.06em;color:var(--sand);">{v.cat}</span></div>}
                 <div style="position:absolute;inset:0;display:grid;place-items:center;">
-                  <span style="width:58px;height:58px;border-radius:999px;background:var(--amber);display:grid;place-items:center;color:#1a1508;box-shadow:0 10px 30px -10px rgba(234,179,8,.6);"><i data-lucide="play" style="width:23px;height:23px;fill:currentColor;margin-inline-start:3px;"></i></span>
+                  <span class="play-btn" style="width:58px;height:58px;border-radius:999px;background:var(--amber);display:grid;place-items:center;color:#1a1508;box-shadow:0 10px 30px -10px rgba(234,179,8,.6);"><i data-lucide="play" style="width:23px;height:23px;fill:currentColor;margin-inline-start:3px;"></i></span>
                 </div>
               </div>
               <div style="padding:15px 17px 17px;">
@@ -239,8 +239,8 @@ const jsonLd = [
     <!-- FIELD JOURNAL -->
     <section id="journal" style="padding:clamp(64px,9vh,120px) 0;position:relative;">
       <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.5;pointer-events:none;"></div>
-      <div style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
-        <div class="rv" style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
+      <div data-interact-key="journal-seq" style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="sec-head" style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
           <div>
             <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.journalKicker}</div>
             <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.6vw,54px);line-height:.95;text-transform:uppercase;margin:0;">{t.journalTitle}</h2>
@@ -248,7 +248,7 @@ const jsonLd = [
           <a href={`/journal?lang=${lang}`} style="display:inline-flex;align-items:center;gap:8px;color:var(--amber);font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;white-space:nowrap;padding-bottom:4px;">{t.journalViewAll}<i data-lucide={arrow} style="width:16px;height:16px;"></i></a>
         </div>
         {posts.map((p) => (
-          <a href={`/journal/${encodeURIComponent(p.slug)}?lang=${lang}`} class="rv" style="display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding:22px 4px;border-bottom:1px solid var(--line);color:var(--fg);text-decoration:none;">
+          <a href={`/journal/${encodeURIComponent(p.slug)}?lang=${lang}`} class="journal-row" style="display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding:22px 4px;border-bottom:1px solid var(--line);color:var(--fg);text-decoration:none;">
             <div style="position:relative;width:140px;height:90px;border-radius:8px;overflow:hidden;border:1px solid var(--line);">
               {p.cover
                 ? <img src={p.cover} alt={p.title} width="140" height="90" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" />
@@ -268,7 +268,7 @@ const jsonLd = [
     <!-- ABOUT -->
     <section id="about" style="padding:clamp(64px,9vh,120px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
       <div class="about-grid" style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:center;">
-        <div class="rv" style="position:relative;aspect-ratio:4/5;border-radius:12px;overflow:hidden;border:1px solid var(--line);">
+        <div class="rv" data-interact-key="about-photo" style="position:relative;aspect-ratio:4/5;border-radius:12px;overflow:clip;border:1px solid var(--line);">
           <img src="/about/zvika.jpg" alt={he ? 'צביקה כהן על אופנוע ה־BMW בנוף מושלג' : 'Zvika Cohen on his BMW motorcycle in a snowy landscape'} width="966" height="1200" loading="lazy" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;" />
           <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.78),transparent 42%);"></div>
           <div style="position:absolute;inset-inline-start:18px;bottom:18px;" class="ofr-mono">
@@ -280,10 +280,10 @@ const jsonLd = [
           <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.8vw,56px);line-height:.98;text-transform:uppercase;margin:0 0 20px;">{t.aboutTitle}</h2>
           <p style="color:var(--fg-dim);font-size:16px;line-height:1.7;margin:0 0 16px;">{t.aboutP1}</p>
           <p style="color:var(--fg-dim);font-size:16px;line-height:1.7;margin:0 0 26px;">{t.aboutP2}</p>
-          <div style="display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;">
-            <div style="flex:1;padding:16px 18px;border-inline-end:1px solid var(--line);"><div class="ofr-mono" style="font-weight:700;font-size:28px;color:var(--amber);">18</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat1}</div></div>
-            <div style="flex:1;padding:16px 18px;border-inline-end:1px solid var(--line);"><div class="ofr-mono" style="font-weight:700;font-size:28px;color:var(--amber);">10+</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat2}</div></div>
-            <div style="flex:1;padding:16px 18px;"><div class="ofr-mono" style="font-weight:700;font-size:28px;color:var(--amber);">100%</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat3}</div></div>
+          <div data-interact-key="about-stats" style="display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;">
+            <div style="flex:1;padding:16px 18px;border-inline-end:1px solid var(--line);"><div class="ofr-mono stat-num" data-count-to="18" style="font-weight:700;font-size:28px;color:var(--amber);">18</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat1}</div></div>
+            <div style="flex:1;padding:16px 18px;border-inline-end:1px solid var(--line);"><div class="ofr-mono stat-num" data-count-to="10" data-count-suffix="+" style="font-weight:700;font-size:28px;color:var(--amber);">10+</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat2}</div></div>
+            <div style="flex:1;padding:16px 18px;"><div class="ofr-mono stat-num" data-count-to="100" data-count-suffix="%" style="font-weight:700;font-size:28px;color:var(--amber);">100%</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat3}</div></div>
           </div>
         </div>
       </div>
@@ -308,12 +308,14 @@ const jsonLd = [
 
   <script>
     import { Interact, add } from '@wix/interact';
-    import { FloatIn } from '@wix/motion-presets';
-    import { roadbookConfig } from '../lib/interact.config';
+    import { FloatIn, RevealIn, ParallaxScroll, Tilt3DMouse, Pulse } from '@wix/motion-presets';
+    import { interactConfig } from '../lib/interact.config';
 
-    Interact.registerEffects({ FloatIn });
-    Interact.create(roadbookConfig);
-    const root = document.querySelector('[data-interact-key="roadbook-seq"]');
-    if (root) add(root as HTMLElement, 'roadbook-seq');
+    Interact.registerEffects({ FloatIn, RevealIn, ParallaxScroll, Tilt3DMouse, Pulse });
+    Interact.create(interactConfig);
+    // Bind every keyed root once it's in the DOM (vanilla entry).
+    document.querySelectorAll('[data-interact-key]').forEach((el) => {
+      add(el as HTMLElement, (el as HTMLElement).dataset.interactKey!);
+    });
   </script>
 </Base>
