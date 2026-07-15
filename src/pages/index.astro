@@ -1,8 +1,319 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+// SSR (not prerendered) so the ?lang toggle switches language per request.
+export const prerender = false;
+import Base from '../layouts/Base.astro';
+import type { Lang } from '../lib/i18n';
+import { DICT } from '../lib/i18n';
+import { getTrips, getReviews, getVideos, getPosts } from '../lib/content';
+import { Interact, generate } from '@wix/interact';
+import { FloatIn } from '@wix/motion-presets';
+import { roadbookConfig } from '../lib/interact.config';
+
+// Generate the entrance/FOUC CSS at build/SSR time from the same config the
+// browser wires at runtime — one source of truth, no drift. vanilla → useFirstChild=false.
+Interact.registerEffects({ FloatIn });
+const interactCSS = generate(roadbookConfig, false);
+
+const lang: Lang = Astro.url.searchParams.get('lang') === 'en' ? 'en' : 'he';
+const t = DICT[lang];
+const he = lang === 'he';
+const arrow = he ? 'arrow-left' : 'arrow-right';
+
+const [trips, reviews, videos, posts] = await Promise.all([
+  getTrips(), getReviews(9), getVideos(9), getPosts(6),
+]);
+
+// Curated high-res hero photos. Desktop = landscape; mobile = portrait crop
+// focused on the rider (hero-N-m.jpg) so the subject stays centered on phones.
+const heroImages = [1, 2, 3, 5, 6, 7, 8].map((n) => ({ d: `/hero/hero-${n}.jpg`, m: `/hero/hero-${n}-m.jpg` }));
+
+const COURSES = [
+  { icon: 'circle-dot', level: { he: 'מתחילים', en: 'Beginner' }, title: { he: 'יסודות השטח', en: 'Off-road fundamentals' }, dur: { he: 'יום אחד', en: '1 day' }, d: { he: 'עמידה, איזון, בלימה ושליטה — הבסיס שכל רוכב שטח חייב.', en: 'Standing, balance, braking and control — the base every rider needs.' } },
+  { icon: 'mountain', level: { he: 'מתקדמים', en: 'Advanced' }, title: { he: 'שטח מתקדם', en: 'Advanced terrain' }, dur: { he: 'יומיים', en: '2 days' }, d: { he: 'מדרונות תלולים, חול עמוק, מכשולים וטכניקות משלחת.', en: 'Steep hills, deep sand, obstacles and expedition technique.' } },
+  { icon: 'compass', level: { he: 'הכנה למסע', en: 'Trip prep' }, title: { he: 'הכנה למסע', en: 'Trip readiness' }, dur: { he: 'יום אחד', en: '1 day' }, d: { he: 'כל מה שצריך לדעת לפני יציאה למסע אופנועים ארוך בחו״ל.', en: 'Everything you need before a long journey abroad.' } },
+  { icon: 'user', level: { he: 'אישי', en: 'Private' }, title: { he: 'הדרכה אישית', en: 'Private coaching' }, dur: { he: 'לפי דרישה', en: 'On request' }, d: { he: 'יום שמותאם אישית לרמה, לאופנוע ולמטרות שלך.', en: 'A day tailored to your level, bike and goals.' } },
+  { icon: 'map', level: { he: 'ניווט', en: 'Navigation' }, title: { he: 'ניווט ורוד־בוק', en: 'Navigation & roadbook' }, dur: { he: 'יום אחד', en: '1 day' }, d: { he: 'קריאת מפה, GPS ורוד־בוק — לא ללכת לאיבוד בשטח.', en: 'Map, GPS and roadbook reading — never get lost.' } },
+  { icon: 'users', level: { he: 'קבוצות', en: 'Groups' }, title: { he: 'קליניקות קבוצתיות', en: 'Group clinics' }, dur: { he: 'חצי יום', en: 'Half day' }, d: { he: 'קליניקות שטח לקבוצות, מועדונים וצוותי עבודה.', en: 'Off-road clinics for groups, clubs and teams.' } },
+];
+
+const hud = [
+  { label: he ? 'מסלולים' : 'ROUTES', value: String(trips.length).padStart(2, '0') },
+  { label: he ? 'מבחני דרך' : 'REVIEWS', value: String(reviews.length).padStart(2, '0') },
+  { label: he ? 'סרטונים' : 'VIDEOS', value: String(videos.length).padStart(2, '0') },
+  { label: he ? 'שנות ניסיון' : 'YEARS', value: '18' },
+];
+const fmtDate = (iso: string) => { try { return new Date(iso).toLocaleDateString(he ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } };
+
+const SITE = 'https://cohen-adve-4a0468ab-itayshmool.wix-site-host.com';
+const YT_CHANNEL = 'https://www.youtube.com/user/cohenmotoable/videos';
+const YT_PATH = 'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12z';
+const ogImage = `${SITE}/og-default.jpg`; // 1200×630 social card
+const pageTitle = he ? 'צביקה כהן השטח · מסעות והדרכות אופנועי שטח' : 'Cohen Adventure · Off-road motorcycle expeditions & training';
+const jsonLd = [
+  {
+    '@context': 'https://schema.org', '@type': ['Organization', 'LocalBusiness'],
+    name: 'Cohen Adventure', alternateName: 'צביקה כהן השטח', url: SITE + '/',
+    description: t.heroSub, image: ogImage,
+    founder: { '@type': 'Person', name: he ? 'צביקה כהן' : 'Zvika Cohen', jobTitle: he ? 'מדריך רכיבת שטח מוסמך' : 'Certified off-road riding instructor' },
+    areaServed: 'Worldwide',
+    knowsAbout: ['adventure motorcycle expeditions', 'off-road riding instruction', 'motorcycle reviews'],
+    makesOffer: COURSES.map((c) => ({ '@type': 'Offer', name: c.title.en, category: 'Off-road riding course' })),
+  },
+  { '@context': 'https://schema.org', '@type': 'WebSite', name: 'Cohen Adventure', inLanguage: lang, url: SITE + '/' },
+];
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<Base lang={lang} title={pageTitle} description={t.heroSub} image={ogImage} jsonLd={jsonLd} preloadImage={heroImages[0].d}>
+  <style is:inline set:html={interactCSS}></style>
+  <main id="top">
+    <!-- HERO -->
+    <section style="position:relative;min-height:100vh;display:flex;align-items:flex-end;overflow:hidden;">
+      <div data-parallax style="position:absolute;inset:-12% 0;background:radial-gradient(120% 92% at 74% 16%,#3a2413 0%,#1b130c 46%,#0b0a09 80%);will-change:transform;">
+        {heroImages.map((h, i) => (
+          <picture>
+            <source media="(max-width:900px)" srcset={h.m} />
+            <img class="hero-slide" src={h.d} alt="" aria-hidden="true" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} decoding="async" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:${i === 0 ? 1 : 0};transition:opacity 1.4s ease;`} />
+          </picture>
+        ))}
+        <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.32;"></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(115deg,rgba(11,10,9,.72),rgba(11,10,9,.28) 42%,rgba(11,10,9,.05) 70%),radial-gradient(70% 60% at 20% 92%,rgba(234,179,8,.10),transparent 60%);"></div>
+        <div style="position:absolute;inset:0;background-image:var(--grain);opacity:.12;mix-blend-mode:overlay;"></div>
+      </div>
+      <!-- legibility scrim: strong at the bottom (where the hero text sits, LTR or RTL) -->
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(6,5,5,.94) 0%,rgba(8,7,6,.74) 22%,rgba(11,10,9,.34) 46%,transparent 68%);"></div>
+      <div style="position:relative;z-index:3;max-width:var(--maxw);margin:0 auto;width:100%;padding:0 clamp(16px,4vw,40px) clamp(48px,7vh,90px);">
+        <div style="display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line-strong);border-radius:6px;padding:7px 13px;margin-bottom:24px;background:rgba(11,10,9,.42);">
+          <span style="width:7px;height:7px;background:var(--amber);"></span>
+          <span class="ofr-mono" style="font-size:11px;letter-spacing:.14em;color:var(--sand);">{t.heroKicker}</span>
+        </div>
+        <h1 style="font-family:var(--disp);font-weight:700;font-size:clamp(48px,9vw,128px);line-height:.9;text-transform:uppercase;margin:0;max-width:16ch;text-shadow:0 2px 30px rgba(0,0,0,.55),0 1px 4px rgba(0,0,0,.5);">{t.heroTitle}</h1>
+        <p style="font-size:clamp(15px,1.9vw,20px);line-height:1.55;color:#e9e2d4;max-width:48ch;margin:24px 0 0;text-shadow:0 1px 14px rgba(0,0,0,.7);">{t.heroSub}</p>
+        <div style="margin-top:34px;">
+          <a href="#roadbook" style="display:inline-flex;align-items:center;gap:10px;background:var(--amber);color:#1a1508;border-radius:8px;padding:16px 26px;font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 12px 40px -14px rgba(234,179,8,.6);">{t.heroCta}<i data-lucide={arrow} style="width:18px;height:18px;"></i></a>
+        </div>
+        <div class="hud-bar" style="display:flex;flex-wrap:wrap;gap:0;margin-top:40px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:rgba(11,10,9,.4);max-width:640px;">
+          {hud.map((h) => (
+            <div style="flex:1 1 140px;padding:15px 18px;border-inline-end:1px solid var(--line);">
+              <div class="ofr-mono" style="font-size:10px;letter-spacing:.16em;color:var(--fg-faint);margin-bottom:6px;">{h.label}</div>
+              <div class="ofr-mono" style="font-size:17px;font-weight:700;color:var(--fg);">{h.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style="position:absolute;inset-inline-end:clamp(16px,4vw,40px);bottom:34px;z-index:3;display:flex;align-items:center;gap:9px;color:var(--fg-faint);font-family:var(--mono);font-size:11px;letter-spacing:.14em;">
+        <i data-lucide="chevrons-down" style="width:15px;height:15px;animation:ofrBob 2.2s ease-in-out infinite;"></i>{t.scroll}
+      </div>
+    </section>
+
+    <!-- ROADBOOK / TRIPS -->
+    <section id="roadbook" style="padding:clamp(64px,9vh,120px) 0;position:relative;">
+      <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.5;pointer-events:none;"></div>
+      <div data-interact-key="roadbook-seq" style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="rv" style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:20px;border-bottom:2px solid var(--line-strong);">
+          <div>
+            <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:12px;">{t.journeysKicker}</div>
+            <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(32px,5.4vw,64px);line-height:.95;text-transform:uppercase;margin:0;">{t.journeysTitle}</h2>
+          </div>
+          <p style="max-width:34ch;color:var(--fg-dim);font-size:15px;line-height:1.6;margin:0;">{t.journeysSub}</p>
+        </div>
+        {trips.map((j) => (
+          <a href={j.url || '#contact'} target={j.url ? '_blank' : undefined} rel={j.url ? 'noopener' : undefined} class="roadbook-row" style="text-decoration:none;color:var(--fg);position:relative;display:grid;grid-template-columns:74px 200px 1fr auto;gap:clamp(16px,2.4vw,30px);align-items:center;padding:22px 6px;border-bottom:1px solid var(--line);transition:background .2s ease;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <span style="font-family:var(--disp);font-weight:700;font-size:38px;line-height:1;color:var(--amber);">{j.num}</span>
+              <span class="ofr-mono" style="font-size:10px;letter-spacing:.1em;color:var(--fg-faint);">WPT</span>
+            </div>
+            <div class="rb-media" style="position:relative;height:112px;border-radius:8px;overflow:hidden;border:1px solid var(--line);">
+              {j.img
+                ? <img src={j.img} alt={j.title} width="200" height="112" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                : <div style={`position:absolute;inset:0;background:linear-gradient(150deg,${j.h1},${j.h2});`}></div>}
+              <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.45),transparent 55%);"></div>
+            </div>
+            <div style="min-width:0;">
+              <h3 style="font-family:var(--disp);font-weight:700;font-size:clamp(20px,2.6vw,28px);line-height:1.02;text-transform:uppercase;margin:0 0 8px;">{j.title}</h3>
+              <p style="color:var(--fg-dim);font-size:13.5px;line-height:1.5;margin:0;max-width:60ch;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{j.desc}</p>
+            </div>
+            <span class="rb-cta" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-hi);white-space:nowrap;">{t.viewTrip}<i data-lucide={arrow} style="width:14px;height:14px;"></i></span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- BIKE REVIEWS -->
+    <section id="reviews" style="padding:clamp(50px,8vh,100px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
+      <div style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="rv" style="margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
+          <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.reviewsKicker}</div>
+          <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.6vw,54px);line-height:.95;text-transform:uppercase;margin:0;">{t.reviewsTitle}</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">
+          {reviews.map((r) => (
+            <a href={r.url || '#'} target={r.url ? '_blank' : undefined} rel="noopener" class="rv" style="text-decoration:none;color:var(--fg);border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--line);display:block;">
+              <div style="position:relative;height:180px;">
+                {r.img
+                  ? <img src={r.img} alt={r.title} width="360" height="180" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                  : <div style={`position:absolute;inset:0;background:linear-gradient(150deg,${r.h1},${r.h2});`}></div>}
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.55),transparent 60%);"></div>
+              </div>
+              <div style="padding:16px 17px 18px;">
+                <h3 style="font-family:var(--disp);font-weight:600;font-size:18px;text-transform:uppercase;margin:0 0 8px;line-height:1.05;">{r.title}</h3>
+                <p style="color:var(--fg-dim);font-size:13px;line-height:1.5;margin:0 0 13px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">{r.desc}</p>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-hi);">{t.readReview}<i data-lucide={arrow} style="width:13px;height:13px;"></i></span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAINING -->
+    <section id="training" style="padding:clamp(64px,9vh,120px) 0;position:relative;">
+      <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.5;pointer-events:none;"></div>
+      <div style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="rv" style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
+          <div>
+            <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.trainingKicker}</div>
+            <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.6vw,54px);line-height:.95;text-transform:uppercase;margin:0;">{t.trainingTitle}</h2>
+          </div>
+          <p style="max-width:34ch;color:var(--fg-dim);font-size:15px;line-height:1.6;margin:0;">{t.trainingSub}</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
+          {COURSES.map((c) => (
+            <a href="#contact" class="rv" style="text-decoration:none;color:var(--fg);position:relative;border-radius:10px;background:var(--surface);border:1px solid var(--line);padding:22px;display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <span style="width:44px;height:44px;border-radius:8px;background:rgba(234,179,8,.12);border:1px solid var(--line-strong);display:grid;place-items:center;color:var(--amber);"><i data-lucide={c.icon} style="width:22px;height:22px;"></i></span>
+                <span class="ofr-mono" style="font-size:10px;letter-spacing:.1em;color:var(--fg-faint);border:1px solid var(--line);border-radius:5px;padding:5px 9px;text-transform:uppercase;">{c.level[lang]}</span>
+              </div>
+              <div>
+                <h3 style="font-family:var(--disp);font-weight:600;font-size:19px;text-transform:uppercase;margin:0 0 8px;line-height:1.02;">{c.title[lang]}</h3>
+                <p style="color:var(--fg-dim);font-size:13px;line-height:1.5;margin:0;">{c.d[lang]}</p>
+              </div>
+              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:13px;border-top:1px solid var(--line);">
+                <span class="ofr-mono" style="display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--fg-dim);"><i data-lucide="clock" style="width:13px;height:13px;color:var(--terra);"></i>{c.dur[lang]}</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-hi);">{t.courseCta}<i data-lucide={arrow} style="width:13px;height:13px;"></i></span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- VIDEOS -->
+    <section id="videos" style="padding:clamp(64px,9vh,120px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
+      <div style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="rv" style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
+          <div>
+            <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.videosKicker}</div>
+            <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.6vw,54px);line-height:.95;text-transform:uppercase;margin:0;">{t.videosTitle}</h2>
+          </div>
+          <div style="max-width:34ch;">
+            <p style="color:var(--fg-dim);font-size:15px;line-height:1.6;margin:0 0 14px;">{t.videosSub}</p>
+            <a href={YT_CHANNEL} target="_blank" rel="noopener noreferrer" class="social-link" style="display:inline-flex;align-items:center;gap:9px;padding:9px 15px;border:1px solid var(--line-strong);border-radius:8px;font-family:var(--disp);font-weight:600;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg);text-decoration:none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#ff0000" aria-hidden="true"><path d={YT_PATH} /></svg>
+              {t.videosChannel}<i data-lucide={arrow} style="width:14px;height:14px;"></i>
+            </a>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;">
+          {videos.map((v) => (
+            <article class="rv" style="border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--line);">
+              <div data-yt={v.embed} style="position:relative;height:198px;cursor:pointer;">
+                {v.thumb
+                  ? <img src={v.thumb} alt={v.title} width="360" height="198" loading="lazy" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
+                  : <div style={`position:absolute;inset:0;background:linear-gradient(150deg,${v.h1},${v.h2});`}></div>}
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.72),rgba(11,10,9,.12));"></div>
+                {v.cat && <div style="position:absolute;top:12px;inset-inline-start:12px;background:rgba(11,10,9,.55);border-radius:5px;padding:5px 10px;"><span class="ofr-mono" style="font-size:10px;letter-spacing:.06em;color:var(--sand);">{v.cat}</span></div>}
+                <div style="position:absolute;inset:0;display:grid;place-items:center;">
+                  <span style="width:58px;height:58px;border-radius:999px;background:var(--amber);display:grid;place-items:center;color:#1a1508;box-shadow:0 10px 30px -10px rgba(234,179,8,.6);"><i data-lucide="play" style="width:23px;height:23px;fill:currentColor;margin-inline-start:3px;"></i></span>
+                </div>
+              </div>
+              <div style="padding:15px 17px 17px;">
+                <h3 style="font-family:var(--disp);font-weight:600;font-size:16px;text-transform:uppercase;margin:0 0 7px;line-height:1.15;">{v.title}</h3>
+                <p style="color:var(--fg-dim);font-size:13px;line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{v.desc}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FIELD JOURNAL -->
+    <section id="journal" style="padding:clamp(64px,9vh,120px) 0;position:relative;">
+      <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.5;pointer-events:none;"></div>
+      <div style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="rv" style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:18px;border-bottom:2px solid var(--line-strong);">
+          <div>
+            <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.journalKicker}</div>
+            <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.6vw,54px);line-height:.95;text-transform:uppercase;margin:0;">{t.journalTitle}</h2>
+          </div>
+          <a href={`/journal?lang=${lang}`} style="display:inline-flex;align-items:center;gap:8px;color:var(--amber);font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;white-space:nowrap;padding-bottom:4px;">{t.journalViewAll}<i data-lucide={arrow} style="width:16px;height:16px;"></i></a>
+        </div>
+        {posts.map((p) => (
+          <a href={`/journal/${encodeURIComponent(p.slug)}?lang=${lang}`} class="rv" style="display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding:22px 4px;border-bottom:1px solid var(--line);color:var(--fg);text-decoration:none;">
+            <div style="position:relative;width:140px;height:90px;border-radius:8px;overflow:hidden;border:1px solid var(--line);">
+              {p.cover
+                ? <img src={p.cover} alt={p.title} width="140" height="90" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                : <div style="position:absolute;inset:0;background:linear-gradient(150deg,#5a4326,#c9a56a);"></div>}
+            </div>
+            <div style="min-width:0;">
+              <div class="ofr-mono" style="font-size:10px;letter-spacing:.08em;color:var(--fg-faint);margin-bottom:8px;">{fmtDate(p.date)}{p.minutes ? ` · ${p.minutes} ${t.minRead}` : ''}</div>
+              <h3 style="font-family:var(--disp);font-weight:600;font-size:clamp(19px,2.4vw,26px);text-transform:uppercase;margin:0 0 7px;line-height:1.02;">{p.title}</h3>
+              <p style="color:var(--fg-dim);font-size:14px;line-height:1.5;margin:0;max-width:60ch;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{p.excerpt}</p>
+            </div>
+            <i data-lucide={arrow} style="width:20px;height:20px;color:var(--fg-faint);"></i>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" style="padding:clamp(64px,9vh,120px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
+      <div class="about-grid" style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:center;">
+        <div class="rv" style="position:relative;aspect-ratio:4/5;border-radius:12px;overflow:hidden;border:1px solid var(--line);">
+          <img src="/about/zvika.jpg" alt={he ? 'צביקה כהן על אופנוע ה־BMW בנוף מושלג' : 'Zvika Cohen on his BMW motorcycle in a snowy landscape'} width="966" height="1200" loading="lazy" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;" />
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.78),transparent 42%);"></div>
+          <div style="position:absolute;inset-inline-start:18px;bottom:18px;" class="ofr-mono">
+            <div style="font-size:12px;color:var(--fg);background:rgba(11,10,9,.5);border-radius:5px;padding:7px 11px;">{t.guideCaption}</div>
+          </div>
+        </div>
+        <div class="rv">
+          <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:15px;">{t.aboutKicker}</div>
+          <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.8vw,56px);line-height:.98;text-transform:uppercase;margin:0 0 20px;">{t.aboutTitle}</h2>
+          <p style="color:var(--fg-dim);font-size:16px;line-height:1.7;margin:0 0 16px;">{t.aboutP1}</p>
+          <p style="color:var(--fg-dim);font-size:16px;line-height:1.7;margin:0 0 26px;">{t.aboutP2}</p>
+          <div style="display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;">
+            <div style="flex:1;padding:16px 18px;border-inline-end:1px solid var(--line);"><div class="ofr-mono" style="font-weight:700;font-size:28px;color:var(--amber);">18</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat1}</div></div>
+            <div style="flex:1;padding:16px 18px;border-inline-end:1px solid var(--line);"><div class="ofr-mono" style="font-weight:700;font-size:28px;color:var(--amber);">10+</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat2}</div></div>
+            <div style="flex:1;padding:16px 18px;"><div class="ofr-mono" style="font-weight:700;font-size:28px;color:var(--amber);">100%</div><div style="font-size:12px;color:var(--fg-faint);margin-top:4px;">{t.aboutStat3}</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" style="padding:clamp(58px,9vh,120px) 0;">
+      <div style="max-width:900px;margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <div class="rv" style="text-align:center;margin-bottom:40px;">
+          <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:13px;">{t.contactKicker}</div>
+          <h2 style="font-family:var(--disp);font-weight:700;font-size:clamp(32px,5.2vw,60px);line-height:.98;text-transform:uppercase;margin:0 auto;max-width:20ch;">{t.contactTitle}</h2>
+        </div>
+        <form class="rv contact-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <label style="display:flex;flex-direction:column;gap:7px;"><span class="ofr-mono" style="font-size:11px;letter-spacing:.08em;color:var(--fg-dim);">{t.fName}</span><input type="text" style="background:var(--surface);border:1px solid var(--line-strong);border-radius:7px;padding:13px;color:var(--fg);font-size:15px;outline:none;" /></label>
+          <label style="display:flex;flex-direction:column;gap:7px;"><span class="ofr-mono" style="font-size:11px;letter-spacing:.08em;color:var(--fg-dim);">{t.fEmail}</span><input type="email" style="background:var(--surface);border:1px solid var(--line-strong);border-radius:7px;padding:13px;color:var(--fg);font-size:15px;outline:none;" /></label>
+          <label style="display:flex;flex-direction:column;gap:7px;grid-column:1 / -1;"><span class="ofr-mono" style="font-size:11px;letter-spacing:.08em;color:var(--fg-dim);">{t.fMsg}</span><textarea rows="4" style="background:var(--surface);border:1px solid var(--line-strong);border-radius:7px;padding:13px;color:var(--fg);font-size:15px;outline:none;resize:vertical;"></textarea></label>
+          <button type="button" style="grid-column:1 / -1;background:var(--amber);color:#1a1508;border:none;border-radius:8px;padding:16px;font-family:var(--disp);font-weight:600;font-size:16px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">{t.fSubmit}</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    import { Interact, add } from '@wix/interact';
+    import { FloatIn } from '@wix/motion-presets';
+    import { roadbookConfig } from '../lib/interact.config';
+
+    Interact.registerEffects({ FloatIn });
+    Interact.create(roadbookConfig);
+    const root = document.querySelector('[data-interact-key="roadbook-seq"]');
+    if (root) add(root as HTMLElement, 'roadbook-seq');
+  </script>
+</Base>

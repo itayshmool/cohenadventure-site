@@ -1,0 +1,214 @@
+---
+import type { Lang } from '../lib/i18n';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import BottomNav from '../components/BottomNav.astro';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  image?: string;            // absolute OG image URL
+  type?: 'website' | 'article';
+  jsonLd?: Record<string, any> | Record<string, any>[];
+  noindex?: boolean;
+  preloadImage?: string;
+}
+
+// Deployed host (update when a custom domain is connected).
+const SITE = 'https://cohen-adve-4a0468ab-itayshmool.wix-site-host.com';
+const {
+  lang,
+  title = lang === 'he' ? 'צביקה כהן השטח · מסעות והדרכות אופנועי שטח' : 'Cohen Adventure · Off-road motorcycle expeditions & training',
+  description = lang === 'he'
+    ? 'צביקה כהן — מדריך רכיבת שטח מוסמך. מסעות אופנוע ברחבי העולם, מבחני דרכים, הדרכות שטח וסרטוני טכניקה.'
+    : 'Zvika Cohen — certified off-road riding instructor. Worldwide motorcycle expeditions, bike reviews, off-road training and technique videos.',
+  image = `${SITE}/og-default.jpg`,
+  type = 'website',
+  jsonLd,
+  noindex = false,
+  preloadImage,
+} = Astro.props;
+
+const dir = lang === 'he' ? 'rtl' : 'ltr';
+const canonical = SITE + Astro.url.pathname;
+const noReveal = Astro.url.searchParams.has('noreveal');
+const jsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+
+<!doctype html>
+<html lang={lang} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    <meta name="theme-color" content="#0b0a09" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Cohen Adventure" />
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="Cohen Adventure" />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta property="og:locale" content={lang === 'he' ? 'he_IL' : 'en_US'} />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+
+    <link rel="alternate" href={SITE + Astro.url.pathname} hreflang={lang} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://static.wixstatic.com" />
+    {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@1,800;1,900&family=Oswald:wght@500;600;700&family=Heebo:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    {jsonLdList.map((j) => (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(j)} />
+    ))}
+    <script is:inline src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style is:global>
+      :root{
+        --ink:#0b0a09; --ink-2:#121110; --ink-3:#1a1815;
+        --surface:rgba(255,255,255,.04); --surface-2:rgba(255,255,255,.07);
+        --line:rgba(232,224,208,.10); --line-strong:rgba(232,224,208,.22);
+        --fg:#f1ebde; --fg-dim:rgba(241,235,222,.62); --fg-faint:rgba(241,235,222,.58);
+        --sand:#cdb489; --khaki:#8b8556; --terra:#cc6838;
+        --amber:#eab308; --amber-hi:#f6c92a;
+        --disp:'Oswald','Heebo',sans-serif;
+        --brand:'Archivo','Heebo',sans-serif;
+        --sans:'Heebo',ui-sans-serif,system-ui,sans-serif;
+        --mono:'JetBrains Mono',ui-monospace,monospace;
+        --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+        --grid:linear-gradient(rgba(232,224,208,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(232,224,208,.045) 1px,transparent 1px);
+        --maxw:1240px;
+      }
+      *{box-sizing:border-box;}
+      html,body{margin:0;padding:0;}
+      body{background:var(--ink);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;}
+      img{max-width:100%;}
+      ::selection{background:var(--amber);color:#1a1508;}
+      a{color:var(--sand);text-decoration:none;transition:color .18s ease;}
+      a:hover{color:var(--amber-hi);}
+      input,textarea,select,button{font-family:inherit;}
+      .ofr-mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+      .social-link:hover{color:var(--amber-hi)!important;border-color:var(--amber)!important;}
+      .rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);}
+      .rv.in{opacity:1;transform:none;}
+      @keyframes ofrBob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
+
+      /* ── nav: desktop top bar vs mobile bottom bar ── */
+      .bottom-nav a.active{color:var(--amber)!important;}
+      @media (max-width:900px){
+        .nav-desktop{display:none!important;}
+        .lang-full{display:none!important;}
+        .lang-flag{display:inline-flex!important;}
+        .bottom-nav{display:flex!important;}
+        body{padding-bottom:66px;}
+      }
+      @media (max-width:430px){ .hdr-wordmark{display:none!important;} }
+
+      /* ── responsive layout (override inline grids) ── */
+      @media (max-width:900px){
+        .about-grid{grid-template-columns:1fr!important;}
+        .roadbook-row{grid-template-columns:52px 1fr!important;row-gap:14px!important;}
+        .roadbook-row .rb-media{grid-column:1 / -1!important;order:3;}
+        .roadbook-row .rb-cta{grid-column:1 / -1!important;order:4;}
+      }
+      @media (max-width:720px){
+        .footer-grid{grid-template-columns:1fr 1fr!important;}
+        .contact-grid{grid-template-columns:1fr!important;}
+        .hud-bar{max-width:100%!important;}
+      }
+      @media (max-width:480px){
+        .footer-grid{grid-template-columns:1fr!important;}
+      }
+      @media (prefers-reduced-motion: reduce){ .rv{opacity:1!important;transform:none!important;transition:none!important;} *{animation:none!important;} }
+    </style>
+    {noReveal && <style is:global>.rv{opacity:1!important;transform:none!important;transition:none!important;}</style>}
+  </head>
+  <body>
+    <Header lang={lang} />
+    <slot />
+    <Footer lang={lang} />
+    <BottomNav lang={lang} />
+
+    <script is:inline>
+      (function () {
+        var reduced = false;
+        try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+        function icons() { try { if (window.lucide) window.lucide.createIcons(); } catch (e) {} }
+        function reveal() {
+          if (reduced) { document.querySelectorAll('.rv').forEach(function (el) { el.classList.add('in'); }); return; }
+          var io = new IntersectionObserver(function (ents) {
+            ents.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+          }, { threshold: 0.1, rootMargin: '0px 0px -8% 0px' });
+          document.querySelectorAll('.rv:not(.in)').forEach(function (el) { io.observe(el); });
+        }
+        function parallax() {
+          if (reduced) return;
+          var hero = document.querySelector('[data-parallax]');
+          if (!hero) return;
+          window.addEventListener('scroll', function () { hero.style.transform = 'translateY(' + (window.scrollY * 0.26) + 'px)'; }, { passive: true });
+        }
+        function videos() {
+          document.querySelectorAll('[data-yt]').forEach(function (el) {
+            el.addEventListener('click', function () {
+              var f = document.createElement('iframe');
+              f.src = el.getAttribute('data-yt'); f.title = 'video';
+              f.allow = 'accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture';
+              f.setAttribute('allowfullscreen', ''); f.loading = 'lazy';
+              f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;';
+              el.innerHTML = ''; el.appendChild(f);
+            });
+          });
+        }
+        function sw() {
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+          }
+        }
+        function activeTab() {
+          try {
+            var hash = location.hash, home = location.pathname === '/' && !hash;
+            document.querySelectorAll('.bottom-nav a').forEach(function (a) {
+              var href = a.getAttribute('href') || '';
+              var anchor = href.indexOf('#') !== -1;
+              if ((!anchor && home) || (hash && anchor && href.slice(href.indexOf('#')) === hash)) a.classList.add('active');
+            });
+          } catch (e) {}
+        }
+        function heroSlideshow() {
+          var slides = document.querySelectorAll('.hero-slide');
+          if (slides.length < 2 || reduced) return;
+          var i = 0;
+          setInterval(function () {
+            slides[i].style.opacity = '0';
+            i = (i + 1) % slides.length;
+            slides[i].style.opacity = '1';
+          }, 5000);
+        }
+        function init() { icons(); reveal(); parallax(); videos(); sw(); activeTab(); heroSlideshow(); }
+        window.addEventListener('hashchange', function () {
+          document.querySelectorAll('.bottom-nav a.active').forEach(function (a) { a.classList.remove('active'); });
+          activeTab();
+        });
+        if (document.readyState !== 'loading') init();
+        else document.addEventListener('DOMContentLoaded', init);
+      })();
+    </script>
+  </body>
+</html>

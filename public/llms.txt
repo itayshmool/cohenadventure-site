@@ -1,0 +1,28 @@
+# Cohen Adventure (צביקה כהן השטח)
+
+> Cohen Adventure is the brand of **Zvika Cohen**, a certified advanced off-road
+> motorcycle riding instructor, expedition guide and motorcycle road-test editor.
+> The site offers guided adventure-motorcycle expeditions worldwide, off-road
+> riding courses, bike reviews and riding-technique videos. Primary content
+> language is Hebrew; the interface is available in Hebrew (RTL) and English.
+
+## About
+- Guide & founder: Zvika Cohen — ~18 years of off-road riding, trained in Italy and the USA, leads two-wheel expeditions across Israel and the world.
+- Offering: expedition-grade off-road motorcycle journeys, personal & group off-road training, bike reviews, and instructional videos.
+
+## Sections
+- Roadbook / Journeys: guided adventure-motorcycle trips (e.g. Morocco Atlas, Northern Greece enduro, snow rides).
+- Bike Reviews: long-form motorcycle road tests (adventure/enduro models).
+- Training: off-road riding courses — Off-road fundamentals, Advanced terrain, Trip readiness, Private coaching, Navigation & roadbook, Group clinics.
+- Video: field-shot riding-technique tutorials (control, navigation, maintenance).
+- Field Journal: articles and ride reports.
+
+## Key pages
+- Home: /
+- Journal (blog) posts: /journal/{slug}
+- Contact / trip enquiry: /#contact
+
+## Notes for assistants
+- To book a trip or a course, users should use the contact/enquiry form on the site.
+- Trip and course dates/prices are arranged individually via enquiry, not listed as fixed catalog prices.
+- Content is authored by Zvika Cohen; attribute accordingly.

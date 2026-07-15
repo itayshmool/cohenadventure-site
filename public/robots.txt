@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cohen-adve-4a0468ab-itayshmool.wix-site-host.com/sitemap.xml

@@ -1,0 +1,81 @@
+---
+// SSR (not prerendered) so the ?lang toggle switches language per request.
+export const prerender = false;
+import Base from '../../layouts/Base.astro';
+import type { Lang } from '../../lib/i18n';
+import { DICT } from '../../lib/i18n';
+import { getPosts } from '../../lib/content';
+
+const lang: Lang = Astro.url.searchParams.get('lang') === 'en' ? 'en' : 'he';
+const t = DICT[lang];
+const he = lang === 'he';
+const home = `/?lang=${lang}`;
+
+const posts = await getPosts(100);
+
+const fmtDate = (iso: string) => { try { return new Date(iso).toLocaleDateString(he ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } };
+
+const SITE = 'https://cohen-adve-4a0468ab-itayshmool.wix-site-host.com';
+const pageTitle = he ? `${t.journalArchiveTitle} · צביקה כהן השטח` : `${t.journalArchiveTitle} · Cohen Adventure`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org', '@type': 'Blog',
+    name: t.journalArchiveTitle, description: t.journalArchiveSub, inLanguage: lang, url: SITE + '/journal',
+    blogPost: posts.map((p) => ({
+      '@type': 'BlogPosting', headline: p.title,
+      url: `${SITE}/journal/${encodeURIComponent(p.slug)}`,
+      datePublished: p.date || undefined, image: p.cover || undefined,
+    })),
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
+      { '@type': 'ListItem', position: 2, name: t.journalArchiveTitle, item: SITE + '/journal' },
+    ],
+  },
+];
+---
+
+<Base lang={lang} title={pageTitle} description={t.journalArchiveSub} jsonLd={jsonLd}>
+  <main id="top" style="padding-top:64px;">
+    <section style="padding:clamp(40px,7vh,84px) 0 clamp(28px,4vh,48px);position:relative;">
+      <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.5;pointer-events:none;"></div>
+      <div style="position:relative;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <a href={home} style="display:inline-flex;align-items:center;gap:8px;color:var(--fg-faint);font-family:var(--mono);font-size:12px;letter-spacing:.06em;margin-bottom:22px;">
+          <i data-lucide={he ? 'arrow-right' : 'arrow-left'} style="width:15px;height:15px;"></i>{t.backHome}
+        </a>
+        <div class="ofr-mono" style="font-size:12px;letter-spacing:.16em;color:var(--terra);margin-bottom:11px;">{t.journalKicker}</div>
+        <h1 style="font-family:var(--disp);font-weight:700;font-size:clamp(32px,5.4vw,62px);line-height:.95;text-transform:uppercase;margin:0 0 14px;">{t.journalArchiveTitle}</h1>
+        <p style="color:var(--fg-dim);font-size:clamp(15px,2vw,18px);line-height:1.6;margin:0;max-width:56ch;">{t.journalArchiveSub}</p>
+      </div>
+    </section>
+
+    <section style="padding:0 0 clamp(64px,9vh,120px);">
+      <div style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);">
+        <!-- toolbar: count + view toggle -->
+        <div class="ofr-mono" style="padding-bottom:18px;margin-bottom:26px;border-bottom:2px solid var(--line-strong);font-size:13px;letter-spacing:.06em;color:var(--fg-dim);">
+          <span style="color:var(--amber);font-weight:700;">{String(posts.length).padStart(2, '0')}</span> {t.journalCount}
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:clamp(16px,2.4vw,28px);">
+          {posts.map((p) => (
+            <a href={`/journal/${encodeURIComponent(p.slug)}?lang=${lang}`} class="rv" style="display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);color:var(--fg);text-decoration:none;">
+              <div style="position:relative;aspect-ratio:16/10;overflow:hidden;">
+                {p.cover
+                  ? <img src={p.cover} alt={p.title} loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                  : <div style="position:absolute;inset:0;background:linear-gradient(150deg,#5a4326,#c9a56a);"></div>}
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.55),transparent 55%);"></div>
+              </div>
+              <div style="padding:16px 17px 18px;display:flex;flex-direction:column;flex:1;">
+                <div class="ofr-mono" style="font-size:10px;letter-spacing:.08em;color:var(--fg-faint);margin-bottom:9px;">{fmtDate(p.date)}{p.minutes ? ` · ${p.minutes} ${t.minRead}` : ''}</div>
+                <h3 style="font-family:var(--disp);font-weight:600;font-size:19px;text-transform:uppercase;margin:0 0 8px;line-height:1.08;">{p.title}</h3>
+                <p style="color:var(--fg-dim);font-size:13.5px;line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">{p.excerpt}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
