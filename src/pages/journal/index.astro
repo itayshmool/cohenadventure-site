@@ -15,7 +15,7 @@ const posts = await getPosts(100);
 
 const fmtDate = (iso: string) => { try { return new Date(iso).toLocaleDateString(he ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } };
 
-const SITE = 'https://cohen-adve-4a0468ab-itayshmool.wix-site-host.com';
+import { SITE } from '../../lib/site';
 const pageTitle = he ? `${t.journalArchiveTitle} · צביקה כהן השטח` : `${t.journalArchiveTitle} · Cohen Adventure`;
 const jsonLd = [
   {
