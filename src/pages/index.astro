@@ -5,14 +5,8 @@ import Base from '../layouts/Base.astro';
 import type { Lang } from '../lib/i18n';
 import { DICT } from '../lib/i18n';
 import { getTrips, getReviews, getVideos, getPosts } from '../lib/content';
-import { Interact, generate } from '@wix/interact';
-import { FloatIn, RevealIn, ParallaxScroll, Tilt3DMouse, Pulse } from '@wix/motion-presets';
-import { interactConfig } from '../lib/interact.config';
-
-// Generate the entrance/FOUC CSS at build/SSR time from the same config the
-// browser wires at runtime — one source of truth, no drift. vanilla → useFirstChild=false.
-Interact.registerEffects({ FloatIn, RevealIn, ParallaxScroll, Tilt3DMouse, Pulse });
-const interactCSS = generate(interactConfig, false);
+// Entrance/FOUC CSS, generated once per server instance (see interact.css.ts).
+import { interactCSS } from '../lib/interact.css';
 
 const lang: Lang = Astro.url.searchParams.get('lang') === 'en' ? 'en' : 'he';
 const t = DICT[lang];
@@ -25,7 +19,10 @@ const [trips, reviews, videos, posts] = await Promise.all([
 
 // Curated high-res hero photos. Desktop = landscape; mobile = portrait crop
 // focused on the rider (hero-N-m.jpg) so the subject stays centered on phones.
-const heroImages = [1, 2, 3, 5, 6, 7, 8].map((n) => ({ d: `/hero/hero-${n}.jpg`, m: `/hero/hero-${n}-m.jpg` }));
+const heroImages = [1, 2, 3, 5, 6, 7, 8].map((n) => ({
+  d: `/hero/hero-${n}.jpg`, m: `/hero/hero-${n}-m.jpg`,
+  dw: `/hero/hero-${n}.webp`, mw: `/hero/hero-${n}-m.webp`,
+}));
 
 const COURSES = [
   { icon: 'circle-dot', level: { he: 'מתחילים', en: 'Beginner' }, title: { he: 'יסודות השטח', en: 'Off-road fundamentals' }, dur: { he: 'יום אחד', en: '1 day' }, d: { he: 'עמידה, איזון, בלימה ושליטה — הבסיס שכל רוכב שטח חייב.', en: 'Standing, balance, braking and control — the base every rider needs.' } },
@@ -63,7 +60,7 @@ const jsonLd = [
 ];
 ---
 
-<Base lang={lang} title={pageTitle} description={t.heroSub} image={ogImage} jsonLd={jsonLd} preloadImage={heroImages[0].d}>
+<Base lang={lang} title={pageTitle} description={t.heroSub} image={ogImage} jsonLd={jsonLd} preloadImage={heroImages[0].dw} preloadImageMobile={heroImages[0].mw}>
   <style is:inline set:html={interactCSS}></style>
   <main id="top">
     <!-- HERO -->
@@ -71,7 +68,9 @@ const jsonLd = [
       <div data-interact-key="hero-bg" style="position:absolute;inset:-12% 0;background:radial-gradient(120% 92% at 74% 16%,#3a2413 0%,#1b130c 46%,#0b0a09 80%);will-change:transform;">
         {heroImages.map((h, i) => (
           <picture>
+            <source type="image/webp" media="(max-width:900px)" srcset={h.mw} />
             <source media="(max-width:900px)" srcset={h.m} />
+            <source type="image/webp" srcset={h.dw} />
             <img class="hero-slide" src={h.d} alt="" aria-hidden="true" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} decoding="async" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:${i === 0 ? 1 : 0};transition:opacity 1.4s ease;`} />
           </picture>
         ))}
@@ -269,7 +268,10 @@ const jsonLd = [
     <section id="about" style="padding:clamp(64px,9vh,120px) 0;background:var(--ink-2);border-block:1px solid var(--line);">
       <div class="about-grid" style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:center;">
         <div class="rv" data-interact-key="about-photo" style="position:relative;aspect-ratio:4/5;border-radius:12px;overflow:clip;border:1px solid var(--line);">
-          <img src="/about/zvika.jpg" alt={he ? 'צביקה כהן על אופנוע ה־BMW בנוף מושלג' : 'Zvika Cohen on his BMW motorcycle in a snowy landscape'} width="966" height="1200" loading="lazy" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;" />
+          <picture>
+            <source type="image/webp" srcset="/about/zvika.webp" />
+            <img src="/about/zvika.jpg" alt={he ? 'צביקה כהן על אופנוע ה־BMW בנוף מושלג' : 'Zvika Cohen on his BMW motorcycle in a snowy landscape'} width="966" height="1200" loading="lazy" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;" />
+          </picture>
           <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.78),transparent 42%);"></div>
           <div style="position:absolute;inset-inline-start:18px;bottom:18px;" class="ofr-mono">
             <div style="font-size:12px;color:var(--fg);background:rgba(11,10,9,.5);border-radius:5px;padding:7px 11px;">{t.guideCaption}</div>

@@ -16,7 +16,7 @@ const off = btn + 'background:transparent;color:var(--fg-dim);';
 ---
 <header style="position:fixed;top:0;inset-inline:0;z-index:60;background:rgba(11,10,9,.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);">
   <div style="max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px);height:64px;display:flex;align-items:center;justify-content:space-between;gap:18px;">
-    <a href={`/?lang=${lang}`} style="display:flex;align-items:center;gap:12px;color:var(--fg);">
+    <a href={`/?lang=${lang}`} aria-label="Cohen Adventure" style="display:flex;align-items:center;gap:12px;color:var(--fg);">
       <Logo height={40} decorative />
       <span class="hdr-wordmark" style="font-family:var(--brand);font-weight:900;font-style:italic;font-size:18px;letter-spacing:.02em;text-transform:uppercase;line-height:1;white-space:nowrap;">Cohen Adventure</span>
     </a>

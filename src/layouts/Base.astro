@@ -12,7 +12,8 @@ interface Props {
   type?: 'website' | 'article';
   jsonLd?: Record<string, any> | Record<string, any>[];
   noindex?: boolean;
-  preloadImage?: string;
+  preloadImage?: string;        // desktop LCP image (preloaded on wide viewports)
+  preloadImageMobile?: string;  // mobile LCP image (preloaded on narrow viewports)
 }
 
 // Deployed host (update when a custom domain is connected).
@@ -28,6 +29,7 @@ const {
   jsonLd,
   noindex = false,
   preloadImage,
+  preloadImageMobile,
 } = Astro.props;
 
 const dir = lang === 'he' ? 'rtl' : 'ltr';
@@ -74,12 +76,26 @@ const jsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://static.wixstatic.com" />
-    {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@1,800;1,900&family=Oswald:wght@500;600;700&family=Heebo:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- LCP image: preload the exact source the <picture> will pick per viewport
+         (webp), so mobile never downloads the large desktop image. -->
+    {preloadImage && <link rel="preload" as="image" type="image/webp" href={preloadImage} media="(min-width:901px)" fetchpriority="high" />}
+    {preloadImageMobile && <link rel="preload" as="image" type="image/webp" href={preloadImageMobile} media="(max-width:900px)" fetchpriority="high" />}
+    <!-- Fonts loaded non-render-blocking (print → all on load); display=swap keeps
+         text visible in the fallback face meanwhile. -->
+    {(() => {
+      const fontsHref = 'https://fonts.googleapis.com/css2?family=Archivo:ital,wght@1,800;1,900&family=Oswald:wght@500;600;700&family=Heebo:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap';
+      return (
+        <>
+          <link rel="preload" as="style" href={fontsHref} />
+          <link rel="stylesheet" href={fontsHref} media="print" onload="this.media='all'" />
+          <noscript><link rel="stylesheet" href={fontsHref} /></noscript>
+        </>
+      );
+    })()}
     {jsonLdList.map((j) => (
       <script type="application/ld+json" is:inline set:html={JSON.stringify(j)} />
     ))}
-    <script is:inline src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script is:inline defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style is:global>
       :root{
         --ink:#0b0a09; --ink-2:#121110; --ink-3:#1a1815;
