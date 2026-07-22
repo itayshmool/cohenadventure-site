@@ -9,6 +9,7 @@ import { wix, imageUrl } from '../../lib/wix';
 import { SITE } from '../../lib/site';
 import { renderRicos } from '../../lib/ricos';
 import { getPosts } from '../../lib/content';
+import { viewId } from '../../lib/views';
 
 const lang: Lang = Astro.url.searchParams.get('lang') === 'en' ? 'en' : 'he';
 const t = DICT[lang];
@@ -37,6 +38,13 @@ const arrow = he ? 'arrow-left' : 'arrow-right';
 let related: any[] = [];
 try { related = (await getPosts(7)).filter((p) => p.slug !== post?.slug).slice(0, 3); } catch {}
 
+// Current view count (our own tally — see /api/view). May be slightly stale under
+// the edge cache; the client beacon refreshes the displayed number after it counts.
+const viewKey = post?.slug || decodeURIComponent(slug ?? '');
+let views = 0;
+try { const v: any = await wix.items.get('PostViews', viewId(viewKey)); views = Number(v?.views) || 0; } catch {}
+const nf = new Intl.NumberFormat(he ? 'he-IL' : 'en-US');
+
 const ogImage = (post ? imageUrl(post.media?.wixMedia?.image ?? post.coverMedia?.image, 1200, 630) : null) ?? `${SITE}/og-default.jpg`;
 const desc = String(post?.excerpt || t.footBlurb || '').slice(0, 200);
 const articleJsonLd = post ? {
@@ -58,8 +66,9 @@ const articleJsonLd = post ? {
       </a>
       {post ? (
         <>
-          <div class="ofr-mono" style="font-size:11px;letter-spacing:.1em;color:var(--terra);margin-bottom:14px;">
-            {t.journalKicker} · {fmtDate(post.firstPublishedDate)}{post.minutesToRead ? ` · ${post.minutesToRead} ${t.minRead}` : ''}
+          <div class="ofr-mono" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px;letter-spacing:.1em;color:var(--terra);margin-bottom:14px;">
+            <span>{t.journalKicker} · {fmtDate(post.firstPublishedDate)}{post.minutesToRead ? ` · ${post.minutesToRead} ${t.minRead}` : ''}</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;color:var(--fg-faint);"><i data-lucide="eye" style="width:13px;height:13px;"></i><span id="view-count">{nf.format(views)}</span> {t.views}</span>
           </div>
           <h1 style="font-family:var(--disp);font-weight:700;font-size:clamp(32px,5.6vw,60px);line-height:1.03;text-transform:uppercase;margin:0 0 24px;">{post.title}</h1>
           {cover && <img src={cover} alt={post.title} width="1400" height="760" fetchpriority="high" decoding="async" style="width:100%;height:auto;border-radius:12px;border:1px solid var(--line);margin-bottom:30px;display:block;" />}
@@ -121,4 +130,20 @@ const articleJsonLd = post ? {
     .article-body .rc-file-ic{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:rgba(234,179,8,.14);color:var(--amber);font-size:18px;font-weight:700;}
     .article-body .rc-file-tx{display:flex;flex-direction:column;line-height:1.3;} .article-body .rc-file-tx small{color:var(--fg-faint);font-family:var(--mono);font-size:11px;}
   </style>
+
+  {post && (
+    <script define:vars={{ slug: post.slug, loc: he ? 'he-IL' : 'en-US' }}>
+      (function () {
+        try {
+          var k = 'cohen-viewed:' + slug;
+          if (sessionStorage.getItem(k)) return;   // one count per session per post
+          sessionStorage.setItem(k, '1');
+          fetch('/api/view', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: slug }) })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) { if (d && typeof d.views === 'number') { var el = document.getElementById('view-count'); if (el) el.textContent = new Intl.NumberFormat(loc).format(d.views); } })
+            .catch(function () {});
+        } catch (e) {}
+      })();
+    </script>
+  )}
 </Base>
