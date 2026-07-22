@@ -127,6 +127,10 @@ const jsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       .rv.in{opacity:1;transform:none;}
       @keyframes ofrBob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
 
+      /* ── hero: independent desktop vs mobile slide sets ── */
+      .hero-mob{display:none;}
+      @media (max-width:900px){ .hero-desk{display:none;} .hero-mob{display:block;} }
+
       /* ── nav: desktop top bar vs mobile bottom bar ── */
       .bottom-nav a.active{color:var(--amber)!important;}
       @media (max-width:900px){
@@ -205,14 +209,32 @@ const jsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
           } catch (e) {}
         }
         function heroSlideshow() {
-          var slides = document.querySelectorAll('.hero-slide');
-          if (slides.length < 2 || reduced) return;
-          var i = 0;
-          setInterval(function () {
-            slides[i].style.opacity = '0';
-            i = (i + 1) % slides.length;
-            slides[i].style.opacity = '1';
-          }, 5000);
+          // Desktop and mobile are independent slide sets. Only the set matching
+          // the current breakpoint runs, and each slide's image is fetched on
+          // demand (just before it shows) so a long rotation stays cheap.
+          var timer = null, cur = null;
+          function start(sel) {
+            if (timer) { clearInterval(timer); timer = null; }
+            var slides = document.querySelectorAll(sel);
+            if (!slides.length) return;
+            var load = function (k) { var s = slides[k]; if (s && !s.getAttribute('src') && s.dataset.src) s.setAttribute('src', s.dataset.src); };
+            slides.forEach(function (s, k) { s.style.opacity = k === 0 ? '1' : '0'; });
+            load(0); load(1);
+            if (slides.length < 2 || reduced) return;
+            var i = 0;
+            timer = setInterval(function () {
+              slides[i].style.opacity = '0';
+              i = (i + 1) % slides.length;
+              load(i); load((i + 1) % slides.length);
+              slides[i].style.opacity = '1';
+            }, 5000);
+          }
+          try {
+            var mq = window.matchMedia('(max-width:900px)');
+            var pick = function () { var sel = mq.matches ? '.hero-slide-m' : '.hero-slide-d'; if (sel !== cur) { cur = sel; start(sel); } };
+            pick();
+            mq.addEventListener('change', pick);
+          } catch (e) { start('.hero-slide-d'); }
         }
         function init() { icons(); reveal(); videos(); sw(); activeTab(); heroSlideshow(); }
         window.addEventListener('hashchange', function () {
