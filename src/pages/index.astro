@@ -17,12 +17,16 @@ const [trips, reviews, videos, posts] = await Promise.all([
   getTrips(), getReviews(9), getVideos(9), getPosts(6),
 ]);
 
-// Curated high-res hero photos. Desktop = landscape; mobile = portrait crop
-// focused on the rider (hero-N-m.jpg) so the subject stays centered on phones.
-const heroImages = [1, 2, 3, 5, 6, 7, 8].map((n) => ({
-  d: `/hero/hero-${n}.jpg`, m: `/hero/hero-${n}-m.jpg`,
-  dw: `/hero/hero-${n}.webp`, mw: `/hero/hero-${n}-m.webp`,
-}));
+// Hero slideshow — desktop and mobile are INDEPENDENT sets (different photos,
+// different counts), each cycled on its own by breakpoint. Desktop = 17 wide
+// landscapes; mobile = 9 portrait crops. Images load on demand (only the slide
+// about to show is fetched) so a long desktop rotation costs nothing up front.
+const heroDesktop = Array.from({ length: 17 }, (_, i) => `/hero/dk-${String(i + 1).padStart(2, '0')}.webp`);
+const heroMobile = [
+  '/hero/hero-1-m.webp', '/hero/hero-2-m.webp', '/hero/hero-3-m.webp',
+  '/hero/hero-5-m.webp', '/hero/hero-6-m.webp', '/hero/hero-7-m.webp',
+  '/hero/hero-8-m.webp', '/hero/nm-13.webp', '/hero/nm-40.webp',
+];
 
 const COURSES = [
   { icon: 'circle-dot', level: { he: 'מתחילים', en: 'Beginner' }, title: { he: 'יסודות השטח', en: 'Off-road fundamentals' }, dur: { he: 'יום אחד', en: '1 day' }, d: { he: 'עמידה, איזון, בלימה ושליטה — הבסיס שכל רוכב שטח חייב.', en: 'Standing, balance, braking and control — the base every rider needs.' } },
@@ -60,20 +64,22 @@ const jsonLd = [
 ];
 ---
 
-<Base lang={lang} title={pageTitle} description={t.heroSub} image={ogImage} jsonLd={jsonLd} preloadImage={heroImages[0].dw} preloadImageMobile={heroImages[0].mw}>
+<Base lang={lang} title={pageTitle} description={t.heroSub} image={ogImage} jsonLd={jsonLd} preloadImage={heroDesktop[0]} preloadImageMobile={heroMobile[0]}>
   <style is:inline set:html={interactCSS}></style>
   <main id="top">
     <!-- HERO -->
     <section style="position:relative;min-height:100vh;display:flex;align-items:flex-end;overflow:clip;">
       <div data-interact-key="hero-bg" style="position:absolute;inset:-12% 0;background:radial-gradient(120% 92% at 74% 16%,#3a2413 0%,#1b130c 46%,#0b0a09 80%);will-change:transform;">
-        {heroImages.map((h, i) => (
-          <picture>
-            <source type="image/webp" media="(max-width:900px)" srcset={h.mw} />
-            <source media="(max-width:900px)" srcset={h.m} />
-            <source type="image/webp" srcset={h.dw} />
-            <img class="hero-slide" src={h.d} alt="" aria-hidden="true" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} decoding="async" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:${i === 0 ? 1 : 0};transition:opacity 1.4s ease;`} />
-          </picture>
-        ))}
+        <div class="hero-desk">
+          {heroDesktop.map((u, i) => (
+            <img class="hero-slide-d" data-src={u} alt="" aria-hidden="true" decoding="async" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:${i === 0 ? 1 : 0};transition:opacity 1.4s ease;`} />
+          ))}
+        </div>
+        <div class="hero-mob">
+          {heroMobile.map((u, i) => (
+            <img class="hero-slide-m" data-src={u} alt="" aria-hidden="true" decoding="async" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:${i === 0 ? 1 : 0};transition:opacity 1.4s ease;`} />
+          ))}
+        </div>
         <div style="position:absolute;inset:0;background-image:var(--grid);background-size:46px 46px;opacity:.32;"></div>
         <div style="position:absolute;inset:0;background:linear-gradient(115deg,rgba(11,10,9,.72),rgba(11,10,9,.28) 42%,rgba(11,10,9,.05) 70%),radial-gradient(70% 60% at 20% 92%,rgba(234,179,8,.10),transparent 60%);"></div>
         <div style="position:absolute;inset:0;background-image:var(--grain);opacity:.12;mix-blend-mode:overlay;"></div>
