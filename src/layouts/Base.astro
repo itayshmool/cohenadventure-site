@@ -16,8 +16,7 @@ interface Props {
   preloadImageMobile?: string;  // mobile LCP image (preloaded on narrow viewports)
 }
 
-// Deployed host (update when a custom domain is connected).
-const SITE = 'https://cohen-adve-4a0468ab-itayshmool.wix-site-host.com';
+import { SITE } from '../lib/site';
 const {
   lang,
   title = lang === 'he' ? 'צביקה כהן השטח · מסעות והדרכות אופנועי שטח' : 'Cohen Adventure · Off-road motorcycle expeditions & training',
