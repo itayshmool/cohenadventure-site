@@ -30,7 +30,7 @@ export const DICT = {
     enquireTrip: 'תיאום המסלול', copyright: '© 2026 צביקה כהן השטח',
     footBlurb: 'ניווט שטח ברמת משלחת אל השטחים הפראיים של כדור הארץ. רודבוק, קבוצות קטנות, ליווי מומחה.',
     brandTag: 'צביקה כהן השטח',
-    minRead: 'דק׳ קריאה',
+    minRead: 'דק׳ קריאה', views: 'צפיות',
   },
   en: {
     enquire: 'Enquire', viewTrip: 'Route', readReview: 'Review',
@@ -61,7 +61,7 @@ export const DICT = {
     enquireTrip: 'Enquire about this route', copyright: '© 2026 Cohen Adventure',
     footBlurb: 'Expedition-grade off-road navigation into the wildest terrain on earth. Roadbooks, small groups, expert guiding.',
     brandTag: 'ZVIKA COHEN · OFF-ROAD',
-    minRead: 'min read',
+    minRead: 'min read', views: 'views',
   },
 } as const;
 
